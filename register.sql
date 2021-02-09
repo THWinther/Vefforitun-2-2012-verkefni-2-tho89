@@ -1,0 +1,8 @@
+CREATE TABLE SIGNITURES (
+    NAME VARCHAR(255) NOT NULL,
+    SSN INT NOT NULL,
+    COMMENT VARCHAR(1023),
+    DISPLAY BIT NOT NULL,
+    TIME timestamp not null default current_timestamp
+    PRIMARY KEY(SSN)
+);

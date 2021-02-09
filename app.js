@@ -1,6 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import { body, sanitize, validationResult } from 'express-validator';
 
+const nationalIdPattern = '^[0-9]{6}-?[0-9]{4}$';
 
 let viewsPath = new URL('./views', import.meta.url).pathname;
 viewsPath = viewsPath.substr(1, viewsPath.length);
@@ -24,15 +26,75 @@ const port = 3000;
 const linkName = `${hostname}:${port}`;
 
 app.get('/', (req, res) => {
-    res.render('index')
+    let Signature = {
+        name: '',
+        comment: '',
+        date:''
+    };
+    res.render('index',{signature: Signature});
 });
 
-app.post('/submit-Signature',(req,res)=> {
-    console.log(req.body.name);
-    console.log(req.body.ssn);
-    console.log(req.body.comment);
-    console.log(req.body.list);
-});
+app.post(
+    '/submit-Signature',
+  
+    // Þetta er bara validation, ekki sanitization
+    body('name')
+      .isLength({ min: 1 })
+      .withMessage('Nafn má ekki vera tómt'),
+    body('ssn')
+      .isLength({ min: 1 })
+      .withMessage('Kennitala má ekki vera tóm'),
+    body('ssn')
+      .matches(new RegExp(nationalIdPattern))
+      .withMessage('Kennitala verður að vera á formi 000000-0000 eða 0000000000'),
+    (req, res, next) => {
+      const {
+        name = '',
+        ssn = '',
+      } = req.body;
+  
+      const errors = validationResult(req);
+  
+      if (!errors.isEmpty()) {
+        const errorMessages = errors.array().map(i => i.msg);
+        return res.send(
+          `<p>Villa</p>`);
+      }
+  
+      return next();
+    },
+    /* Nú sanitizeum við gögnin, þessar aðgerðir munu breyta gildum í body.req */
+    // Fjarlægja whitespace frá byrjun og enda
+    // „Escape“ á gögn, breytir stöfum sem hafa merkingu í t.d. HTML í entity
+    // t.d. < í &lt;
+    body('name').trim().escape(),
+    body('comment').trim().escape(),
+  
+    // Fjarlægjum - úr kennitölu, þó svo við leyfum í innslátt þá viljum við geyma
+    // á normalizeruðu formi (þ.e.a.s. allar geymdar sem 10 tölustafir)
+    // Hér gætum við viljað breyta kennitölu í heiltölu (int) en... það myndi
+    // skemma gögnin okkar, því kennitölur geta byrjað á 0
+    body('ssn').blacklist('-'),
+  
+    (req, res) => {
+  
+    const {
+        name = '',
+        ssn = '',
+        comment = ''
+        } = req.body;
+        
+        let signature = 
+        {
+            "name":name,
+            "comment":comment,
+            "date":new Date()
+        };
+
+      return   res.render('index',
+      { signature: signature });
+    },
+  );
 
 
 
