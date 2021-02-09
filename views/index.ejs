@@ -1,21 +1,20 @@
 <h1>Undirskriftalisti</h1>
-<form>
+<form method="POST" action="/submit-Signature">
 
-    <label for="name" >Nafn*</label><br>
+    <label for="name" >Nafn*</label>
     <input type="text" id="name" name="name" required>
-
-    <label for="ssn" >SSN*</label><br>
+    <br>
+    <label for="ssn" >SSN*</label>
     <input type="text" id="ssn" name="ssn" placeholder="000000-0000" required>
-
-    <label for="comment">Athugasemd:</label><br>
+    <br>
+    <label for="comment">Athugasemd:</label>
     <input type="textarea" id="comment" name="comment">
-
-    <label for="list" >Ekki Birta nafn á lista</label><br>
+    <br>
+    <label for="list" >Ekki Birta nafn á lista</label>
     <input type="checkbox" id="list" name="list">   
-
+    <br>
+    <input type="submit" id="submit" value="Skrifa Undir">
 </form>
-
-<button>Skrifa Undir</button>
 
 <h1>Undirskriftir</h1>
 
