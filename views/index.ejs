@@ -15,7 +15,7 @@
     <br>
     <input type="submit" id="submit" value="Skrifa Undir">
 </form>
-
+<p><%=error%></p>
 <h1>Undirskriftir</h1>
 
 <table>
@@ -24,9 +24,11 @@
         <th><b>Nafn</b></th>
         <th><b>Athugasemd</b></th>
     </tr>
+    <% signature.forEach((el ,i) =>{%> 
     <tr>
-        <th> <%=signature.date%></th>
-        <th> <%=signature.name%> </th>
-        <th> <%=signature.comment%></th>
+        <th> <%=signature[i].date%></th>
+        <th> <%=signature[i].name%> </th>
+        <th> <%=signature[i].comment%></th>
     </tr>
+    <% }); %>
 </table>

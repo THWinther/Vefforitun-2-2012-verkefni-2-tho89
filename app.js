@@ -4,13 +4,7 @@ import { body, sanitize, validationResult } from 'express-validator';
 import pg from 'pg';
 
 const nationalIdPattern = '^[0-9]{6}-?[0-9]{4}$';
-const laug = new pg.Pool({
-  user : 'postgres',
-  host : '127.0.0.1',
-  port : '5432',
-  password : '3156',
-  database : 'postgres'
-});
+
 
 
 let viewsPath = new URL('./views', import.meta.url).pathname;
@@ -34,13 +28,26 @@ const hostname = '127.0.0.1';
 const port = 3000;
 const linkName = `${hostname}:${port}`;
 
-app.get('/', (req, res) => {
-    let Signature = {
-        name: '',
-        comment: '',
-        date:''
-    };
-    res.render('index',{signature: Signature});
+app.get('/', async(req, res) => {
+  try{
+    const laug = new pg.Pool({
+      user : 'postgres',
+      host : '127.0.0.1',
+      port : '5432',
+      password : '3156',
+      database : 'postgres'
+    });
+
+    let client = await laug.connect();
+    let result = await client.query("SELECT date,ssn,name FROM signatures")
+    console.log(result.rows);
+    client.release();
+    await laug.end();
+    return  res.render('index',{ signature: result.rows, error:'' });
+    } catch(e){
+      console.error(e);
+    }
+    res.render('index',{signature: Signature,error:''});
 });
 
 app.post(
@@ -56,7 +63,7 @@ app.post(
     body('ssn')
       .matches(new RegExp(nationalIdPattern))
       .withMessage('Kennitala verður að vera á formi 000000-0000 eða 0000000000'),
-    (req, res, next) => {
+    (req, res, next)=>{
       const {
         name = '',
         ssn = '',
@@ -66,8 +73,7 @@ app.post(
   
       if (!errors.isEmpty()) {
         const errorMessages = errors.array().map(i => i.msg);
-        return res.send(
-          `<p>Villa</p>`);
+        return res.render('index',{error:'Rangt form af gögnum'})
       }
   
       return next();
@@ -85,23 +91,35 @@ app.post(
     // skemma gögnin okkar, því kennitölur geta byrjað á 0
     body('ssn').blacklist('-'),
   
-    (req, res) => {
+    async (req, res) => {
   
     const {
         name = '',
         ssn = '',
         comment = ''
-        } = req.body;
-        
-    let signature = 
-    {
-      "name":name,
-      "comment":comment,
-      "date":new Date()
-    };
+    } = req.body;
 
-    return   res.render('index',{ signature: signature });
-    },
+    try{
+      const laug = new pg.Pool({
+        user : 'postgres',
+        host : '127.0.0.1',
+        port : '5432',
+        password : '3156',
+        database : 'postgres'
+      });
+
+      let signature = [name,ssn,comment];
+      let client = await laug.connect();
+      const insertQuery = 'INSERT INTO signatures(name,ssn,comment,date) VALUES($1,$2,$3,current_timestamp) RETURNING *';
+      let result = await client.query(insertQuery,signature);
+      result = await client.query("SELECT date,ssn,name FROM signatures")
+      client.release();
+      await laug.end();
+      return  res.render('index',{ signature: result.rows ,error:''});
+      } catch(e){
+        console.error(e);
+      }
+    }
   );
 
 
@@ -110,3 +128,5 @@ app.listen(port, hostname, () => {
     app.locals.hostname = linkName;
     console.log(`Server running at http://${hostname}:${port}/`);
   });
+
+
