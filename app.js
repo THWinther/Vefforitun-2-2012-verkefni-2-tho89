@@ -1,8 +1,17 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { body, sanitize, validationResult } from 'express-validator';
+import pg from 'pg';
 
 const nationalIdPattern = '^[0-9]{6}-?[0-9]{4}$';
+const laug = new pg.Pool({
+  user : 'postgres',
+  host : '127.0.0.1',
+  port : '5432',
+  password : '3156',
+  database : 'postgres'
+});
+
 
 let viewsPath = new URL('./views', import.meta.url).pathname;
 viewsPath = viewsPath.substr(1, viewsPath.length);
@@ -84,15 +93,14 @@ app.post(
         comment = ''
         } = req.body;
         
-        let signature = 
-        {
-            "name":name,
-            "comment":comment,
-            "date":new Date()
-        };
+    let signature = 
+    {
+      "name":name,
+      "comment":comment,
+      "date":new Date()
+    };
 
-      return   res.render('index',
-      { signature: signature });
+    return   res.render('index',{ signature: signature });
     },
   );
 
