@@ -26,7 +26,7 @@
     </tr>
     <% signature.forEach((el ,i) =>{%> 
     <tr>
-        <th> <%=signature[i].date%></th>
+        <th> <%=signature[i].date.toString().substring(0,15)%></th>
         <th> <%=signature[i].name%> </th>
         <th> <%=signature[i].comment%></th>
     </tr>

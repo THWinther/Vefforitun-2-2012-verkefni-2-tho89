@@ -37,17 +37,17 @@ app.get('/', async(req, res) => {
       password : '3156',
       database : 'postgres'
     });
-
+    
     let client = await laug.connect();
-    let result = await client.query("SELECT date,ssn,name FROM signatures")
-    console.log(result.rows);
+    let result = await client.query("SELECT date,ssn,name,comment FROM signatures")
     client.release();
     await laug.end();
-    return  res.render('index',{ signature: result.rows, error:'' });
+    app.locals.signature = result.rows;
+    console.log(result.rows);
+    return  res.render('index',{ error:'' });
     } catch(e){
       console.error(e);
     }
-    res.render('index',{signature: Signature,error:''});
 });
 
 app.post(
@@ -55,8 +55,8 @@ app.post(
   
     // Þetta er bara validation, ekki sanitization
     body('name')
-      .isLength({ min: 1 })
-      .withMessage('Nafn má ekki vera tómt'),
+      .isLength({ min: 1 , max:64})
+      .withMessage('Nafn má ekki vera tómt eða lengra en 64 stafir'),
     body('ssn')
       .isLength({ min: 1 })
       .withMessage('Kennitala má ekki vera tóm'),
@@ -67,13 +67,15 @@ app.post(
       const {
         name = '',
         ssn = '',
+        comment = ''
       } = req.body;
   
       const errors = validationResult(req);
   
       if (!errors.isEmpty()) {
         const errorMessages = errors.array().map(i => i.msg);
-        return res.render('index',{error:'Rangt form af gögnum'})
+        console.log(errorMessages)
+        return  res.render('index',{ error:errorMessages[0] });
       }
   
       return next();
@@ -112,12 +114,14 @@ app.post(
       let client = await laug.connect();
       const insertQuery = 'INSERT INTO signatures(name,ssn,comment,date) VALUES($1,$2,$3,current_timestamp) RETURNING *';
       let result = await client.query(insertQuery,signature);
-      result = await client.query("SELECT date,ssn,name FROM signatures")
+      result = await client.query("SELECT date,ssn,name,comment FROM signatures")
       client.release();
       await laug.end();
-      return  res.render('index',{ signature: result.rows ,error:''});
+      app.locals.signature = result.rows;
+      return  res.render('index',{ error:''});
       } catch(e){
         console.error(e);
+        return  res.render('index',{ error:'Kennitala þegar notuð'});
       }
     }
   );
