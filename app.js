@@ -3,25 +3,23 @@ import bodyParser from 'body-parser';
 import { body, validationResult } from 'express-validator';
 import pg from 'pg';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
 const nationalIdPattern = '^[0-9]{6}-?[0-9]{4}$';
 
-let viewsPath = new URL('./views', import.meta.url).pathname;
-viewsPath = viewsPath.substr(1, viewsPath.length);
 
-let publicURL = new URL('./public', import.meta.url).pathname;
-publicURL = publicURL.substring(1, publicURL.length);
 
 const app = express();
 
 app.locals.importantize = (str) => (`${str}!`);
 
+app.set('views', path.join(path.dirname(''), '/views'));
 app.set('view engine', 'ejs');
-app.set('views', viewsPath);
 
-app.use(express.static(publicURL));
+
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -36,7 +34,7 @@ app.locals.signature = [];
 
 app.get('/', async (req, res) => {
   try {
-    const laug = new pg.Pool({connectionString : process.env.DATABASE_URL, ssl:{rejectUnauthorized: false}});
+    const laug = new pg.Pool({connectionString : process.env.DATABASE_URL , ssl:{rejectUnauthorized: false}});
     const client = await laug.connect();
     const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures');
     client.release();
