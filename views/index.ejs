@@ -26,11 +26,14 @@
     </tr>
     <% signature.forEach((el ,i) =>{%> 
     <tr>
-        <%if(signature[i].list===''){%>
         <th> <%=signature[i].date.toString().substring(0,15)%></th>
+        <%if(signature[i].list===''){%>
         <th> <%=signature[i].name%> </th>
-        <th> <%=signature[i].comment%></th>
+        <%}else{%>
+            <th>Anonymous<th>
         <%}%>
+        <th> <%=signature[i].comment%></th>
+        
     </tr>
     <% }); %>
 </table>
