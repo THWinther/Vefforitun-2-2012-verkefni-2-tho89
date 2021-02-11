@@ -9,16 +9,12 @@ dotenv.config();
 
 const nationalIdPattern = '^[0-9]{6}-?[0-9]{4}$';
 
-
-
 const app = express();
 
 app.locals.importantize = (str) => (`${str}!`);
 
 app.set('views', path.join(path.dirname(''), '/views'));
 app.set('view engine', 'ejs');
-
-
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -29,12 +25,13 @@ const linkName = `${hostname}:${port}`;
 
 app.locals.signature = [];
 
-
-
-
 app.get('/', async (req, res) => {
   try {
-    const laug = new pg.Pool({connectionString : process.env.DATABASE_URL , ssl:{rejectUnauthorized: false}});
+    const laug = new pg.Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+    });
+
     const client = await laug.connect();
     const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures');
     client.release();
@@ -44,7 +41,7 @@ app.get('/', async (req, res) => {
     return res.render('index');
   } catch (e) {
     console.error(e);
-    app.locals.error = 'parse error'
+    app.locals.error = 'parse error';
     return res.render('index');
   }
 });
@@ -102,23 +99,26 @@ app.post(
       name = '',
       ssn = '',
       comment = '',
-      list = false
+      list = false,
     } = req.body;
 
     try {
-      const laug = new pg.Pool({connectionString : process.env.DATABASE_URL, ssl:{rejectUnauthorized: false}});
+      const laug = new pg.Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false },
+      });
 
-      const signature = [name, ssn, comment,list];
+      const signature = [name, ssn, comment, list];
       const client = await laug.connect();
       const insertQuery = 'INSERT INTO signatures(name,ssn,comment,list) VALUES($1,$2,$3,$4) RETURNING *';
-      let result = await client.query(insertQuery, signature);
+      const result = await client.query(insertQuery, signature);
       client.release();
       await laug.end();
       app.locals.signature = result.rows;
       res.redirect('/');
     } catch (e) {
       app.locals.error = 'kennitala í notkun';
-      res.redirect('/')
+      res.redirect('/');
     }
   },
 );
