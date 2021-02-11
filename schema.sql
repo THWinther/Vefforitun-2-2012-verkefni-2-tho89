@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS signatures(
   name varchar(128) not null,
   ssn varchar(10) not null unique,
   comment text not null,
-  anonymous boolean not null default true,
-  signed timestamp with time zone not null default current_timestamp
+  list text not null,
+  date timestamp with time zone not null default current_timestamp
 );

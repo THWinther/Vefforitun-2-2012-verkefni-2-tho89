@@ -29,6 +29,8 @@ const hostname = '127.0.0.1';
 const port = 3000;
 const linkName = `${hostname}:${port}`;
 
+app.locals.signature = [];
+
 app.get('/', async (req, res) => {
   try {
     const laug = new pg.Pool({
@@ -40,7 +42,7 @@ app.get('/', async (req, res) => {
     });
 
     const client = await laug.connect();
-    const result = await client.query('SELECT date,ssn,name,comment FROM signatures');
+    const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures');
     client.release();
     await laug.end();
     app.locals.signature = result.rows;
@@ -90,6 +92,7 @@ app.post(
   // t.d. < í &lt;
   body('name').trim().escape(),
   body('comment').trim().escape(),
+  body('list').trim().escape(),
 
   // Fjarlægjum - úr kennitölu, þó svo við leyfum í innslátt þá viljum við geyma
   // á normalizeruðu formi (þ.e.a.s. allar geymdar sem 10 tölustafir)
@@ -102,6 +105,7 @@ app.post(
       name = '',
       ssn = '',
       comment = '',
+      list = ''
     } = req.body;
 
     try {
@@ -113,11 +117,12 @@ app.post(
         database: 'postgres',
       });
 
-      const signature = [name, ssn, comment];
+      const signature = [name, ssn, comment,list];
       const client = await laug.connect();
-      const insertQuery = 'INSERT INTO signatures(name,ssn,comment,date) VALUES($1,$2,$3,current_timestamp) RETURNING *';
+      const insertQuery = 'INSERT INTO signatures(name,ssn,comment,list) VALUES($1,$2,$3,$4) RETURNING *';
       let result = await client.query(insertQuery, signature);
-      result = await client.query('SELECT date,ssn,name,comment FROM signatures');
+      console.log(result.rows);
+      result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures');
       client.release();
       await laug.end();
       app.locals.signature = result.rows;
