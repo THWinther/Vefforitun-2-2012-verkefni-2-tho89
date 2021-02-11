@@ -25,8 +25,8 @@ app.use(express.static(publicURL));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const hostname = '127.0.0.1';
-const port = 3000;
+const hostname = process.env.HOST;
+const port = process.env.PORT;
 const linkName = `${hostname}:${port}`;
 
 app.locals.signature = [];
@@ -130,5 +130,6 @@ app.post(
 
 app.listen(port, hostname, () => {
   app.locals.hostname = linkName;
+
   console.log(`Server running at http://${hostname}:${port}/`);
 });
