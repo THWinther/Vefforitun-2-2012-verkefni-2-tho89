@@ -31,12 +31,14 @@ const linkName = `${hostname}:${port}`;
 
 app.locals.signature = [];
 
+
 const connectionString = process.env.DATABASE_URL;
 
 app.get('/', async (req, res) => {
   try {
+    const ssl = 'development' !== 'development' ? { rejectUnauthorized: false } : false;
     const connectionString = process.env.DATABASE_URL;
-    const laug = new pg.Pool({connectionString});
+    const laug = new pg.Pool({connectionString,ssl});
     const client = await laug.connect();
     const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures');
     client.release();
@@ -108,7 +110,8 @@ app.post(
     } = req.body;
 
     try {
-      const laug = await new pg.Pool({connectionString});
+      const ssl = 'development' !== 'development' ? { rejectUnauthorized: false } : false;
+      const laug = await new pg.Pool({connectionString,ssl});
 
       const signature = [name, ssn, comment,list];
       const client = await laug.connect();
