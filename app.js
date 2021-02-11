@@ -32,7 +32,6 @@ const linkName = `${hostname}:${port}`;
 app.locals.signature = [];
 
 const connectionString = process.env.DATABASE_URL;
-console.log(connectionString);
 
 app.get('/', async (req, res) => {
   try {
@@ -43,10 +42,12 @@ app.get('/', async (req, res) => {
     client.release();
     await laug.end();
     app.locals.signature = result.rows;
-    return res.render('index', { error: '' });
+    app.locals.error = '';
+    return res.render('index');
   } catch (e) {
     console.error(e);
-    return res.render('index', { error: 'parse error' });
+    app.locals.error = 'parse error'
+    return res.render('index');
   }
 });
 
@@ -78,7 +79,8 @@ app.post(
     if (!errors.isEmpty()) {
       const errorMessages = errors.array().map((i) => i.msg);
       console.log(errorMessages);
-      return res.render('index', { error: errorMessages[0] });
+      app.locals.error = errorMessages[0];
+      return res.render('index');
     }
 
     return next();
@@ -106,22 +108,19 @@ app.post(
     } = req.body;
 
     try {
-      const connectionString = process.env.DATABASE_URL;
-      console.log(connectionString);
       const laug = await new pg.Pool({connectionString});
 
       const signature = [name, ssn, comment,list];
       const client = await laug.connect();
       const insertQuery = 'INSERT INTO signatures(name,ssn,comment,list) VALUES($1,$2,$3,$4) RETURNING *';
       let result = await client.query(insertQuery, signature);
-      result = await client.query('SELECT date,ssn,name,comment FROM signatures');
       client.release();
       await laug.end();
       app.locals.signature = result.rows;
-      return res.render('index', { error: '' });
+      res.redirect('/');
     } catch (e) {
-      console.error(e);
-      return res.render('index', { error: 'Kennitala þegar notuð' });
+      app.locals.error = 'kennitala í notkun';
+      res.redirect('/')
     }
   },
 );
