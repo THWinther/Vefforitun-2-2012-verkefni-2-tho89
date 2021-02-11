@@ -2,13 +2,13 @@
 <form method="POST" action="/submit-Signature">
 
     <label for="name" >Nafn*</label>
-    <input type="text" id="name" name="name" required>
+    <input type="text" id="name" name="name" maxlength="63" required>
     <br>
     <label for="ssn" >SSN*</label>
     <input type="text" id="ssn" name="ssn" placeholder="000000-0000" required>
     <br>
     <label for="comment">Athugasemd:</label>
-    <input type="textarea" id="comment" name="comment">
+    <input type="textarea" id="comment" name="comment" maxlength="1023">
     <br>
     <label for="list" >Ekki Birta nafn á lista</label>
     <input type="checkbox" id="list" name="list">   
