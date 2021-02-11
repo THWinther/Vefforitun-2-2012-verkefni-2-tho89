@@ -34,11 +34,7 @@ app.locals.signature = [];
 app.get('/', async (req, res) => {
   try {
     const laug = new pg.Pool({
-      user: process.env.DB_USER,
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      password: process.env.DB_PASS,
-      database: process.env.DB_DATABASE
+      connectionString: process.env.DATABASE_URL
     });
 
     const client = await laug.connect();
@@ -110,11 +106,7 @@ app.post(
 
     try {
       const laug = new pg.Pool({
-        user: 'postgres',
-        host: '127.0.0.1',
-        port: '5432',
-        password: '3156',
-        database: 'postgres',
+        connectionString: process.env.DATABASE_URL
       });
 
       const signature = [name, ssn, comment,list];
