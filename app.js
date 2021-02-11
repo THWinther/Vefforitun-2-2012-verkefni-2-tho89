@@ -25,17 +25,34 @@ app.use(express.static(publicURL));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const hostname = '127.0.0.1';
-const port = 3000;
+const hostname = process.env.HOST;
+const port = process.env.PORT;
 const linkName = `${hostname}:${port}`;
 
 app.locals.signature = [];
 
+
+async function table(){
+const poool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {rejectUnauthorized: false}
+});
+
+let cli = await poool.connect();
+await cli.query('CREATE TABLE IF NOT EXISTS signatures(id serial primary key,name varchar(128) not null,ssn varchar(10) not null unique,comment text not null,list text not null, date timestamp with time zone not null default current_timestamp);');
+cli.release()
+poool.release();
+}
+
+await table();
+
 app.get('/', async (req, res) => {
   try {
-    const laug = new pg.Pool({
-      connectionString: process.env.DATABASE_URL
-    });
+
+  const laug = new pg.Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: {rejectUnauthorized: false}
+  });
 
     const client = await laug.connect();
     const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures');
