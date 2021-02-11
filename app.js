@@ -25,35 +25,19 @@ app.use(express.static(publicURL));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const hostname = process.env.HOST;
-const port = process.env.PORT;
+const hostname = '127.0.0.1';
+const port = 3000;
 const linkName = `${hostname}:${port}`;
 
 app.locals.signature = [];
 
-
-async function table(){
-const poool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {rejectUnauthorized: false}
-});
-
-let cli = await poool.connect();
-await cli.query('CREATE TABLE IF NOT EXISTS signatures(id serial primary key,name varchar(128) not null,ssn varchar(10) not null unique,comment text not null,list text not null, date timestamp with time zone not null default current_timestamp);');
-cli.release()
-poool.release();
-}
-
-await table();
+const connectionString = process.env.DATABASE_URL;
+console.log(connectionString);
 
 app.get('/', async (req, res) => {
   try {
-
-  const laug = new pg.Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: {rejectUnauthorized: false}
-  });
-
+    const connectionString = process.env.DATABASE_URL;
+    const laug = new pg.Pool({connectionString});
     const client = await laug.connect();
     const result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures');
     client.release();
@@ -118,20 +102,19 @@ app.post(
       name = '',
       ssn = '',
       comment = '',
-      list = ''
+      list = false
     } = req.body;
 
     try {
-      const laug = new pg.Pool({
-        connectionString: process.env.DATABASE_URL
-      });
+      const connectionString = process.env.DATABASE_URL;
+      console.log(connectionString);
+      const laug = await new pg.Pool({connectionString});
 
       const signature = [name, ssn, comment,list];
       const client = await laug.connect();
       const insertQuery = 'INSERT INTO signatures(name,ssn,comment,list) VALUES($1,$2,$3,$4) RETURNING *';
       let result = await client.query(insertQuery, signature);
-      console.log(result.rows);
-      result = await client.query('SELECT signatures.date, signatures.ssn, signatures.name, signatures.comment, signatures.list FROM signatures');
+      result = await client.query('SELECT date,ssn,name,comment FROM signatures');
       client.release();
       await laug.end();
       app.locals.signature = result.rows;
