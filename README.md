@@ -7,3 +7,5 @@ svo keyra npm run setup sem mun setja upp töflu sem er notuð fyrir virkni
 eslint - npm run test
 
 keyra netþjón - npm run start
+
+heroku link - https://vefforitun-2-verkefni-2-tho89.herokuapp.com/
