@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": "npx eslint app.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "setup": "node setup.js"
   },
   "author": "",
   "license": "ISC",
