@@ -5,4 +5,5 @@ búa til .env skjal sem inniheldur DATABASE_URL=[tenging á gangagrun]
 svo keyra npm run setup sem mun setja upp töflu sem er notuð fyrir virkni
 
 eslint - npm run test
+
 keyra netþjón - npm run start
