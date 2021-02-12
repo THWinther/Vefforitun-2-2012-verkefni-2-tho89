@@ -29,7 +29,7 @@ app.get('/', async (req, res) => {
   try {
     const laug = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      /*ssl: { rejectUnauthorized: false },*/
     });
 
     const client = await laug.connect();
@@ -105,7 +105,7 @@ app.post(
     try {
       const laug = new pg.Pool({
         connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false },
+        /*ssl: { rejectUnauthorized: false },*/
       });
 
       const signature = [name, ssn, comment, list];
